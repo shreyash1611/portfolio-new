@@ -1,0 +1,4 @@
+/cmd/server/server
+/cmd/server/main
+*.exe
+.env

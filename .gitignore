@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+*.swp
+
+# Go
+/backend/cmd/server/server
+/backend/cmd/server/main
+*.exe
+
+# Env files -- never commit real secrets
+.env
+.env.local
+
+# Frontend (future)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
