@@ -34,7 +34,7 @@ export default function Home() {
             fontSize: "0.85rem",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "var(--muted)",
+            color: "var(--accent)",
           }}
         >
           Backend · Machine Learning

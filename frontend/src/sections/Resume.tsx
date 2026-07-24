@@ -10,7 +10,7 @@ export default function Resume() {
         alignItems: "center",
       }}
     >
-      <h1 style={{ marginTop: 0 }}>resume</h1>
+      <h1 style={{ marginTop: 0, color: "var(--accent)" }}>resume</h1>
       <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>
         Resume PDF coming soon — drop the file in{" "}
         <code>frontend/public/</code> and this button will download it.

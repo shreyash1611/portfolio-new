@@ -5,8 +5,8 @@ const API_BASE_URL =
 
 const SKILL_GROUPS = [
   {
-    title: "Backend",
-    items: ["Go", "TypeScript", "C/C++", "Python", "Solidity"],
+    title: "Backend & Scripting",
+    items: ["Go", "TypeScript", "C/C++", "Python", "Solidity", "Bash", "SQL"],
   },
   {
     title: "Front end",
@@ -160,8 +160,8 @@ function maxOf(points: RatingPoint[]): number {
 }
 
 const CHART_WIDTH = 520;
-const CHART_HEIGHT = 220;
-const CHART_PADDING = { top: 16, right: 12, bottom: 28, left: 42 };
+const CHART_HEIGHT = 180;
+const CHART_PADDING = { top: 12, right: 12, bottom: 24, left: 38 };
 const X_TICK_MONTHS = 4;
 const RATING_LOOKBACK_MONTHS = 24;
 
@@ -176,19 +176,19 @@ function CombinedRatingChart({
   const anchor = allDates.length > 0 ? Math.max(...allDates) : Date.now();
   const series = [
     {
-      label: "leetcode",
+      label: "LeetCode",
       color: "#ffa116",
       points: filterLastMonths(leetcode, anchor, RATING_LOOKBACK_MONTHS),
     },
     {
-      label: "codeforces",
+      label: "Codeforces",
       color: "#4d90fe",
       points: filterLastMonths(codeforces, anchor, RATING_LOOKBACK_MONTHS),
     },
   ];
   const allPoints = series.flatMap((s) => s.points);
   if (allPoints.length === 0) {
-    return <p style={{ color: "var(--muted)" }}>no contest data</p>;
+    return <p className="skills-status">No contest data</p>;
   }
 
   const innerWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
@@ -221,11 +221,11 @@ function CombinedRatingChart({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div>
       <svg
         width="100%"
         viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-        style={{ maxWidth: CHART_WIDTH }}
+        style={{ maxWidth: CHART_WIDTH, display: "block" }}
       >
         {yTicks.map((rating) => (
           <g key={rating}>
@@ -241,6 +241,7 @@ function CombinedRatingChart({
               y={yFor(rating) - 3}
               fill="var(--muted)"
               fontSize={10}
+              fontFamily="Space Grotesk, sans-serif"
             >
               {Math.round(rating)}
             </text>
@@ -261,6 +262,7 @@ function CombinedRatingChart({
               fill="var(--muted)"
               fontSize={10}
               textAnchor="middle"
+              fontFamily="Space Grotesk, sans-serif"
             >
               {new Date(ms).toLocaleDateString("en-US", {
                 month: "short",
@@ -294,33 +296,12 @@ function CombinedRatingChart({
           </g>
         ))}
       </svg>
-      <div
-        style={{
-          display: "flex",
-          gap: "1.25rem",
-          marginTop: 4,
-          justifyContent: "center",
-        }}
-      >
+      <div className="skills-chart-legend">
         {series.map((s) => (
-          <div
-            key={s.label}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: "0.85rem",
-              color: "var(--muted)",
-            }}
-          >
+          <div key={s.label}>
             <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
-                backgroundColor: s.color,
-                display: "inline-block",
-              }}
+              className="skills-chart-legend__swatch"
+              style={{ backgroundColor: s.color }}
             />
             {s.label}
           </div>
@@ -330,7 +311,7 @@ function CombinedRatingChart({
   );
 }
 
-function StatCard({
+function SpecStat({
   label,
   value,
   sub,
@@ -340,19 +321,19 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div style={{ textAlign: "center", minWidth: "6.5rem" }}>
-      <div style={{ fontSize: "0.7rem", color: "var(--muted)", marginBottom: 4 }}>
-        {label}
-      </div>
-      <div style={{ fontSize: "1.35rem", color: "var(--accent)" }}>{value}</div>
-      {sub && (
-        <div style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: 2 }}>
-          {sub}
-        </div>
-      )}
+    <div className="skills-stat">
+      <div className="skills-stat__value">{value}</div>
+      <div className="skills-stat__label">{label}</div>
+      {sub && <div className="skills-stat__sub">{sub}</div>}
     </div>
   );
 }
+
+const RANGE_OPTIONS: { id: Range; label: string }[] = [
+  { id: "3m", label: "3 mo" },
+  { id: "6m", label: "6 mo" },
+  { id: "all", label: "All" },
+];
 
 export default function Skills() {
   const [state, setState] = useState<FetchState>({ status: "idle" });
@@ -376,46 +357,23 @@ export default function Skills() {
   }, []);
 
   return (
-    <section style={{ width: "100%", maxWidth: "1100px", margin: "0 auto" }}>
-      <h1 style={{ marginTop: 0, textAlign: "center" }}>skills</h1>
+    <section className="skills-page">
+      <p className="skills-kicker">Capability</p>
+      <h1 className="skills-title">Skills</h1>
+      <p className="skills-lede">
+        What I ship with, and the contest numbers behind it.
+      </p>
 
       <div className="skills-layout">
-        {/* Left: skill groups */}
-        <div style={{ textAlign: "center" }}>
+        <div>
           {SKILL_GROUPS.map((group) => (
-            <div key={group.title} style={{ marginBottom: "1.75rem" }}>
-              <h2
-                style={{
-                  fontSize: "0.95rem",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--accent)",
-                  margin: "0 0 0.75rem",
-                }}
-              >
-                {group.title}
-              </h2>
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.4rem",
-                }}
-              >
-                {group.items.map((item) => (
-                  <li
-                    key={item}
-                    style={{
-                      color: "var(--fg)",
-                      fontSize: "0.95rem",
-                      padding: "0.35rem 0.6rem",
-                      borderBottom: "1px solid var(--border)",
-                    }}
-                  >
+            <div key={group.title} className="skills-group">
+              <h2 className="skills-group__label">{group.title}</h2>
+              <ul className="skills-list">
+                {group.items.map((item, i) => (
+                  <li key={item}>
                     {item}
+                    <span>{String(i + 1).padStart(2, "0")}</span>
                   </li>
                 ))}
               </ul>
@@ -423,112 +381,74 @@ export default function Skills() {
           ))}
         </div>
 
-        {/* Right: live profile / contest stats */}
-        <div style={{ textAlign: "center" }}>
-          <h2
-            style={{
-              fontSize: "0.95rem",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "var(--accent)",
-              margin: "0 0 1rem",
-            }}
-          >
-            profiles
-          </h2>
+        <div>
+          <div className="skills-metrics__head">
+            <h2 className="skills-group__label" style={{ margin: 0 }}>
+              Profiles
+            </h2>
+          </div>
 
           {state.status === "loading" && (
-            <p style={{ color: "var(--muted)" }}>loading stats…</p>
+            <p className="skills-status">Loading stats…</p>
           )}
           {state.status === "error" && (
-            <p style={{ color: "crimson" }}>error: {state.message}</p>
+            <p className="skills-status skills-status--error">
+              Error: {state.message}
+            </p>
           )}
           {state.status === "success" && (
             <>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "0.75rem",
-                  justifyContent: "center",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <StatCard
-                  label="LC max"
+              <div className="skills-stat-grid">
+                <SpecStat
+                  label="LeetCode max"
                   value={Math.round(maxOf(state.data.ratings.leetcode))}
-                  sub={`now ${Math.round(state.data.profiles.leetcode.rating)}`}
+                  sub={`Now ${Math.round(state.data.profiles.leetcode.rating)}`}
                 />
-                <StatCard
-                  label="CF max"
+                <SpecStat
+                  label="Codeforces max"
                   value={state.data.profiles.codeforces.maxRating}
                   sub={state.data.profiles.codeforces.maxRank}
                 />
-                <StatCard
-                  label="LC solved"
+                <SpecStat
+                  label="LeetCode solved"
                   value={state.data.problemsSolved.leetcode.total}
-                  sub={`${state.data.problemsSolved.leetcode.easy}E / ${state.data.problemsSolved.leetcode.medium}M / ${state.data.problemsSolved.leetcode.hard}H`}
+                  sub={`${state.data.problemsSolved.leetcode.easy}E · ${state.data.problemsSolved.leetcode.medium}M · ${state.data.problemsSolved.leetcode.hard}H`}
                 />
-                <StatCard
-                  label="CF solved"
+                <SpecStat
+                  label="Codeforces solved"
                   value={state.data.problemsSolved.codeforces.total}
-                  sub={`${state.data.problemsSolved.codeforces.easy}E / ${state.data.problemsSolved.codeforces.medium}M / ${state.data.problemsSolved.codeforces.hard}H`}
+                  sub={`${state.data.problemsSolved.codeforces.easy}E · ${state.data.problemsSolved.codeforces.medium}M · ${state.data.problemsSolved.codeforces.hard}H`}
                 />
               </div>
 
-              <h3 style={{ fontSize: "0.9rem", margin: "0 0 0.75rem" }}>
-                contest ratings
-              </h3>
-              <CombinedRatingChart
-                leetcode={state.data.ratings.leetcode}
-                codeforces={state.data.ratings.codeforces}
-              />
+              <div className="skills-block">
+                <h3 className="skills-block__title">Contest ratings</h3>
+                <CombinedRatingChart
+                  leetcode={state.data.ratings.leetcode}
+                  codeforces={state.data.ratings.codeforces}
+                />
+              </div>
 
-              <div
-                style={{
-                  marginTop: "1.75rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <h3 style={{ fontSize: "0.9rem", margin: 0 }}>
-                  activity heatmap
-                </h3>
-                <label style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                  range:{" "}
-                  <select
-                    value={range}
-                    onChange={(e) => setRange(e.target.value as Range)}
-                  >
-                    <option value="3m">3 months</option>
-                    <option value="6m">6 months</option>
-                    <option value="all">all</option>
-                  </select>
-                </label>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "1.25rem",
-                    justifyContent: "center",
-                  }}
-                >
+              <div className="skills-block">
+                <h3 className="skills-block__title">Activity</h3>
+                <div className="skills-range" role="group" aria-label="Heatmap range">
+                  {RANGE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      aria-pressed={range === opt.id}
+                      onClick={() => setRange(opt.id)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="skills-heatmap">
                   {toMonthlyCalendars(
                     filterByRange(state.data.heatmap, range),
                   ).map((month) => (
                     <div key={month.label}>
-                      <div
-                        style={{
-                          marginBottom: 6,
-                          fontSize: "0.75rem",
-                          color: "var(--muted)",
-                          textAlign: "center",
-                        }}
-                      >
-                        {month.label}
-                      </div>
+                      <div className="skills-heatmap__month">{month.label}</div>
                       <div
                         style={{
                           display: "flex",

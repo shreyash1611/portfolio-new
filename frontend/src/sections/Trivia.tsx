@@ -4,75 +4,85 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const LETTERS = ["T", "R", "I", "V", "I", "A"] as const;
+const STACK = ["Go backend", "React + GSAP", "Three.js", "Cursor"] as const;
 
-const LETTER_COLORS = [
-  "#ff5c8a",
-  "#ffb020",
-  "#3ddc97",
-  "#5b8cff",
-  "#ff7a45",
-  "#c084fc",
-];
+function AsteriskMark() {
+  return (
+    <span className="trivia-mark trivia-mark--asterisk" aria-hidden>
+      <svg viewBox="0 0 40 40" width="1em" height="1em">
+        <path
+          fill="currentColor"
+          d="M20 2l2.4 12.2L34 10l-8.2 9.2L36 28l-12.4-2.2L20 38l-3.6-12.2L4 28l10.2-8.8L6 10l11.6 4.2z"
+        />
+      </svg>
+    </span>
+  );
+}
 
-const CHIPS = [
-  { label: "Go backend", color: "#3ddc97" },
-  { label: "React + GSAP", color: "#5b8cff" },
-  { label: "Three.js", color: "#ff7a45" },
-  { label: "Cursor", color: "#ff5c8a" },
-];
+function BoltMark() {
+  return (
+    <span className="trivia-mark trivia-mark--bolt" aria-hidden>
+      <svg viewBox="0 0 32 48" width="0.55em" height="0.85em">
+        <path fill="currentColor" d="M18 0L4 26h10L8 48l20-30H16L26 0z" />
+      </svg>
+    </span>
+  );
+}
 
 export default function Trivia() {
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    const letters = letterRefs.current.filter(Boolean) as HTMLSpanElement[];
-    if (letters.length === 0) return;
+    const title = titleRef.current;
+    if (!title) return;
+    const parts = title.querySelectorAll(".trivia-title__part");
+    const asterisk = title.querySelector(".trivia-mark--asterisk");
+    const bolt = title.querySelector(".trivia-mark--bolt");
 
-    gsap.set(letters, {
-      scale: 0,
-      y: 48,
-      opacity: 0,
-      transformOrigin: "50% 100%",
-      rotation: -12,
-    });
-
+    gsap.set(parts, { y: 36, opacity: 0 });
     const tl = gsap.timeline();
-    letters.forEach((letter, i) => {
-      tl.to(
-        letter,
-        {
-          keyframes: [
-            {
-              scale: 1.95,
-              y: -26,
-              opacity: 1,
-              rotation: 8,
-              duration: 0.28,
-              ease: "power2.out",
-            },
-            {
-              scale: 1,
-              y: 0,
-              rotation: 0,
-              duration: 0.36,
-              ease: "back.out(1.8)",
-            },
-          ],
-        },
-        i * 0.15,
-      );
+    tl.to(parts, {
+      y: 0,
+      opacity: 1,
+      duration: 0.7,
+      stagger: 0.07,
+      ease: "power3.out",
     });
+
+    const loops: gsap.core.Tween[] = [];
+    if (asterisk) {
+      loops.push(
+        gsap.to(asterisk, {
+          rotation: 360,
+          duration: 7,
+          ease: "none",
+          repeat: -1,
+          delay: 0.9,
+        }),
+      );
+    }
+    if (bolt) {
+      loops.push(
+        gsap.to(bolt, {
+          rotateY: "+=180",
+          duration: 0.55,
+          ease: "power2.inOut",
+          repeat: -1,
+          repeatDelay: 1.45,
+          delay: 1.1,
+          transformPerspective: 400,
+        }),
+      );
+    }
 
     return () => {
       tl.kill();
+      for (const loop of loops) loop.kill();
     };
   }, []);
 
-  // Pin + horizontal scrub: vertical wheel slides panels sideways. No content
-  // below the pin, so once the last panel (credit) is reached, scrolling ends.
   useEffect(() => {
     const pin = pinRef.current;
     const track = trackRef.current;
@@ -123,44 +133,31 @@ export default function Trivia() {
 
   return (
     <section className="trivia-page trivia-hscroll">
-      <div className="trivia-blobs" aria-hidden>
-        <span className="trivia-blob trivia-blob-a" />
-        <span className="trivia-blob trivia-blob-b" />
-        <span className="trivia-blob trivia-blob-c" />
-      </div>
-
       <div ref={pinRef} className="trivia-pin">
         <div ref={trackRef} className="trivia-track">
           <article className="trivia-panel" id="trivia-intro">
-            <p className="trivia-kicker">behind the scenes</p>
-            <h1 aria-label="Trivia" className="trivia-title">
-              {LETTERS.map((letter, i) => (
-                <span
-                  key={`${letter}-${i}`}
-                  ref={(el) => {
-                    letterRefs.current[i] = el;
-                  }}
-                  style={{
-                    display: "inline-block",
-                    willChange: "transform",
-                    color: LETTER_COLORS[i],
-                    textShadow: `0 4px 0 color-mix(in srgb, ${LETTER_COLORS[i]} 35%, black)`,
-                  }}
-                >
-                  {letter}
-                </span>
-              ))}
+            <p className="trivia-kicker">Behind the scenes</p>
+            <h1 ref={titleRef} aria-label="Trivia" className="trivia-title">
+              <span className="trivia-title__part">TR</span>
+              <span className="trivia-title__part">
+                <AsteriskMark />
+              </span>
+              <span className="trivia-title__part">V</span>
+              <span className="trivia-title__part">
+                <BoltMark />
+              </span>
+              <span className="trivia-title__part">A</span>
             </h1>
             <p className="trivia-lead">
-              Scroll to ride sideways through a few notes on how this portfolio
-              came together.
+              <span className="trivia-brace">{"{"}</span>
+              Scroll sideways through a few notes on how this portfolio came
+              together.
+              <span className="trivia-brace">{"}"}</span>
             </p>
           </article>
 
           <article className="trivia-panel" id="trivia-built">
-            <h2 className="trivia-heading" style={{ color: "#ffb020" }}>
-              How it was built
-            </h2>
+            <h2 className="trivia-heading">How it was built</h2>
             <p className="trivia-body">
               This site was built together — me, and an AI coding assistant in
               Cursor — over a stretch of evenings. We started with a Go backend
@@ -171,40 +168,27 @@ export default function Trivia() {
           </article>
 
           <article className="trivia-panel" id="trivia-stack">
-            <h2 className="trivia-heading" style={{ color: "#3ddc97" }}>
-              The stack
-            </h2>
+            <h2 className="trivia-heading">The stack</h2>
             <p className="trivia-body">
               Go on the server. React and TypeScript on the client. GSAP for
               motion. Three.js for the little orange car. None of it was meant
               to be a framework museum — just the tools that made the idea feel
               alive.
             </p>
-            <div className="trivia-chips">
-              {CHIPS.map((chip) => (
-                <span
-                  key={chip.label}
-                  style={{
-                    fontFamily: '"Fredoka", sans-serif',
-                    fontWeight: 600,
-                    fontSize: "0.85rem",
-                    padding: "0.4rem 0.85rem",
-                    borderRadius: "999px",
-                    color: "#111",
-                    background: chip.color,
-                    boxShadow: `0 3px 0 color-mix(in srgb, ${chip.color} 55%, black)`,
-                  }}
-                >
-                  {chip.label}
+            <p className="trivia-stack-block" aria-label="Stack">
+              <span className="trivia-brace">{"{"}</span>
+              {STACK.map((item, i) => (
+                <span key={item}>
+                  {item}
+                  {i < STACK.length - 1 ? " · " : ""}
                 </span>
               ))}
-            </div>
+              <span className="trivia-brace">{"}"}</span>
+            </p>
           </article>
 
           <article className="trivia-panel" id="trivia-car">
-            <h2 className="trivia-heading" style={{ color: "#5b8cff" }}>
-              The car
-            </h2>
+            <h2 className="trivia-heading">The car</h2>
             <p className="trivia-body">
               The car on the navbar is a BMW E30 — an absolute classic. Compact,
               boxy, honest proportions. Still one of the most beautiful shapes
@@ -214,9 +198,7 @@ export default function Trivia() {
           </article>
 
           <article className="trivia-panel" id="trivia-life">
-            <h2 className="trivia-heading" style={{ color: "#ff7a45" }}>
-              Music &amp; fashion
-            </h2>
+            <h2 className="trivia-heading">Music &amp; fashion</h2>
             <p className="trivia-body">
               Outside work, music and fashion take up a lot of my headspace. I
               care about how things sound and how they look — playlists,
@@ -228,7 +210,10 @@ export default function Trivia() {
 
           <article className="trivia-panel trivia-credit" id="trivia-credit">
             <p className="trivia-credit-line">
-              Made with <span aria-hidden="true">🤍</span> by Shreyash Chaurasia
+              Made by Shreyash Chaurasia
+              <span className="trivia-credit-mark" aria-hidden>
+                ✦
+              </span>
             </p>
           </article>
         </div>

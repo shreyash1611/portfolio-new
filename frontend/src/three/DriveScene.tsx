@@ -60,12 +60,16 @@ interface DriveSceneProps {
   theme: Theme;
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
+  onLoadProgress?: (progress: number) => void;
+  onLoadComplete?: () => void;
 }
 
 export default function DriveScene({
   theme,
   activeIndex,
   onActiveIndexChange,
+  onLoadProgress,
+  onLoadComplete,
 }: DriveSceneProps) {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const carRef = useRef<THREE.Object3D | null>(null);
@@ -77,6 +81,10 @@ export default function DriveScene({
   // *current* selection instead of whatever it was when the effect first ran.
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
+  const onLoadProgressRef = useRef(onLoadProgress);
+  onLoadProgressRef.current = onLoadProgress;
+  const onLoadCompleteRef = useRef(onLoadComplete);
+  onLoadCompleteRef.current = onLoadComplete;
 
   const isDark = theme === "dark";
 
@@ -92,6 +100,7 @@ export default function DriveScene({
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     } catch (err) {
       console.warn("DriveScene: WebGL unavailable, skipping 3D scene", err);
+      onLoadCompleteRef.current?.();
       return;
     }
 
@@ -173,39 +182,57 @@ export default function DriveScene({
     let car: THREE.Object3D | null = null;
 
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load(CAR_MODEL_URL, (gltf) => {
-      if (cancelled) return;
-      car = gltf.scene;
+    gltfLoader.load(
+      CAR_MODEL_URL,
+      (gltf) => {
+        if (cancelled) return;
+        car = gltf.scene;
 
-      // The model ships with its own studio-style ground disc ("Plane_0",
-      // using the "asphalt" material) -- we already have our own road
-      // plane, so hide the model's copy to avoid a double-ground look.
-      const modelGround = car.getObjectByName("Plane_0");
-      if (modelGround) modelGround.visible = false;
+        // The model ships with its own studio-style ground disc ("Plane_0",
+        // using the "asphalt" material) -- we already have our own road
+        // plane, so hide the model's copy to avoid a double-ground look.
+        const modelGround = car.getObjectByName("Plane_0");
+        if (modelGround) modelGround.visible = false;
 
-      // Tame the body paint's clearcoat -- at full strength it acts like a
-      // mirror and, combined with the top-down camera, creates a blown-out
-      // highlight rather than reading as glossy orange paint.
-      car.traverse((node) => {
-        if (
-          node instanceof THREE.Mesh &&
-          node.material instanceof THREE.MeshPhysicalMaterial &&
-          node.material.clearcoat > 0
-        ) {
-          node.material.clearcoat = 0.35;
-          node.material.clearcoatRoughness = 0.3;
+        // Tame the body paint's clearcoat -- at full strength it acts like a
+        // mirror and, combined with the top-down camera, creates a blown-out
+        // highlight rather than reading as glossy orange paint.
+        car.traverse((node) => {
+          if (
+            node instanceof THREE.Mesh &&
+            node.material instanceof THREE.MeshPhysicalMaterial &&
+            node.material.clearcoat > 0
+          ) {
+            node.material.clearcoat = 0.35;
+            node.material.clearcoatRoughness = 0.3;
+          }
+        });
+
+        car.scale.setScalar(CAR_SCALE);
+        // Rotates the model so its hood/badge face up the road (away from
+        // camera), matching the model's default front-facing orientation.
+        car.rotation.y = Math.PI;
+        car.position.set(0, 0, worldZFor(STOP_FRACTIONS[activeIndexRef.current]));
+        scene.add(car);
+        carRef.current = car;
+        shadow.visible = true;
+        onLoadProgressRef.current?.(100);
+        onLoadCompleteRef.current?.();
+      },
+      (event) => {
+        if (cancelled) return;
+        if (event.lengthComputable && event.total > 0) {
+          onLoadProgressRef.current?.((event.loaded / event.total) * 100);
+        } else if (event.loaded > 0) {
+          // Some servers omit Content-Length; nudge the bar so it still feels alive.
+          onLoadProgressRef.current?.(Math.min(90, (event.loaded / (14 * 1024 * 1024)) * 100));
         }
-      });
-
-      car.scale.setScalar(CAR_SCALE);
-      // Rotates the model so its hood/badge face up the road (away from
-      // camera), matching the model's default front-facing orientation.
-      car.rotation.y = Math.PI;
-      car.position.set(0, 0, worldZFor(STOP_FRACTIONS[activeIndexRef.current]));
-      scene.add(car);
-      carRef.current = car;
-      shadow.visible = true;
-    });
+      },
+      (err) => {
+        console.warn("DriveScene: failed to load car model", err);
+        if (!cancelled) onLoadCompleteRef.current?.();
+      },
+    );
 
     let frameId = 0;
     function renderFrame() {

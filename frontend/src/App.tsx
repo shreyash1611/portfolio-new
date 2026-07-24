@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DriveScene, { SIDEBAR_WIDTH } from "./three/DriveScene";
 import ThemeToggle, { type Theme } from "./ThemeToggle";
+import CarLoader from "./CarLoader";
 import { SECTIONS } from "./sections";
 import Home from "./sections/Home";
 import Skills from "./sections/Skills";
@@ -14,6 +15,9 @@ const SECTION_VIEWS = [Home, Skills, Project, Resume, Socials, Trivia] as const;
 function App() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [carReady, setCarReady] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -23,15 +27,27 @@ function App() {
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   }, [activeIndex]);
 
+  // Keep the overlay mounted through its fade-out, then unmount.
+  useEffect(() => {
+    if (!carReady) return;
+    const id = window.setTimeout(() => setShowLoader(false), 700);
+    return () => window.clearTimeout(id);
+  }, [carReady]);
+
   const ActiveSection = SECTION_VIEWS[activeIndex] ?? Home;
   const isTrivia = SECTIONS[activeIndex]?.id === "trivia";
 
   return (
     <>
+      {showLoader && (
+        <CarLoader progress={loadProgress} ready={carReady} />
+      )}
       <DriveScene
         theme={theme}
         activeIndex={activeIndex}
         onActiveIndexChange={setActiveIndex}
+        onLoadProgress={setLoadProgress}
+        onLoadComplete={() => setCarReady(true)}
       />
       <ThemeToggle
         theme={theme}
