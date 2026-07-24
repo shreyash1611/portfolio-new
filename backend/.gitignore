@@ -1,4 +1,10 @@
+# Built binaries
 /cmd/server/server
 /cmd/server/main
 *.exe
+*.test
+
+# Env -- never commit real secrets
 .env
+.env.*
+!.env.example

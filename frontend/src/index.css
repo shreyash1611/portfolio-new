@@ -1,19 +1,74 @@
+:root {
+  --bg: #000;
+  --fg: #eee;
+  --panel-bg: #111;
+  --border: #333;
+  --muted: #888;
+  --accent: #ffa116;
+  --sidebar-bg: #000;
+  --sidebar-border: #1a1a1a;
+  /* Heatmap intensity — GitHub-style, tuned per theme so light mode
+     doesn't crush empty/low days into near-black squares. */
+  --heat-0: #161b22;
+  --heat-1: #0e4429;
+  --heat-2: #006d32;
+  --heat-3: #26a641;
+  --heat-4: #39d353;
+}
+
+/* Warm "solar" palette for light mode -- cream paper, amber accents.
+   Attribute selector lives on :root/html so it reliably overrides the
+   default custom properties above (same element, later in the cascade). */
+:root[data-theme="light"] {
+  --bg: #fdf3e2;
+  --fg: #3a2c1a;
+  --panel-bg: #fff8ea;
+  --border: #e8d5ad;
+  --muted: #8a7452;
+  --accent: #e2790a;
+  --sidebar-bg: #fdf3e2;
+  --sidebar-border: #e8d5ad;
+  --heat-0: #ebedf0;
+  --heat-1: #9be9a8;
+  --heat-2: #40c463;
+  --heat-3: #30a14e;
+  --heat-4: #216e39;
+}
+
 body {
   font-family: monospace;
-  margin: 2rem;
-  background-color: #000;
-  color: #eee;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition:
+    background-color 0.8s ease,
+    color 0.8s ease;
+}
+
+.font-display {
+  font-family: "Monoton", cursive;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.font-about {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
 }
 
 button {
   font-family: monospace;
   font-size: 1rem;
   padding: 0.5rem 1.25rem;
-  background-color: #111;
-  color: #eee;
-  border: 1px solid #333;
+  background-color: var(--panel-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
   border-radius: 4px;
   cursor: pointer;
+  transition:
+    background-color 0.8s ease,
+    color 0.8s ease,
+    border-color 0.8s ease;
 }
 
 button:disabled {
@@ -25,8 +80,183 @@ select {
   font-family: monospace;
   font-size: 0.9rem;
   padding: 0.3rem 0.5rem;
-  background-color: #111;
-  color: #eee;
-  border: 1px solid #333;
+  background-color: var(--panel-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
   border-radius: 4px;
+  transition:
+    background-color 0.8s ease,
+    color 0.8s ease,
+    border-color 0.8s ease;
+}
+
+.skills-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(320px, 1.4fr);
+  gap: 2.5rem;
+  align-items: start;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 820px) {
+  .skills-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-meta {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem 2rem;
+}
+
+@media (max-width: 640px) {
+  .home-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trivia-page {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.trivia-hscroll {
+  width: 100%;
+}
+
+.trivia-pin {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.trivia-track {
+  display: flex;
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+}
+
+.trivia-panel {
+  height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 3rem;
+  box-sizing: border-box;
+}
+
+.trivia-credit {
+  align-items: center;
+  text-align: center;
+}
+
+.trivia-credit-line {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1.2rem, 3vw, 1.75rem);
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 0.02em;
+}
+
+.trivia-kicker {
+  margin: 0 0 0.75rem;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ff5c8a;
+}
+
+.trivia-title {
+  display: flex;
+  gap: 0.08em;
+  margin: 0 0 1.25rem;
+  font-family: "Bagel Fat One", system-ui, cursive;
+  font-weight: 400;
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.trivia-lead,
+.trivia-body {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.7;
+  color: var(--fg);
+  max-width: 34rem;
+}
+
+.trivia-heading {
+  margin: 0 0 0.9rem;
+  font-family: "Bagel Fat One", system-ui, cursive;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  font-weight: 400;
+}
+
+.trivia-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 820px) {
+  .trivia-panel {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+.trivia-blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.trivia-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.45;
+}
+
+.trivia-blob-a {
+  width: 220px;
+  height: 220px;
+  top: 8%;
+  left: 5%;
+  background: #ff5c8a;
+}
+
+.trivia-blob-b {
+  width: 260px;
+  height: 260px;
+  top: 35%;
+  right: 0%;
+  background: #5b8cff;
+}
+
+.trivia-blob-c {
+  width: 200px;
+  height: 200px;
+  bottom: 10%;
+  left: 30%;
+  background: #3ddc97;
+}
+
+:root[data-theme="light"] .trivia-blob {
+  opacity: 0.28;
 }

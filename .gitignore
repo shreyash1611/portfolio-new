@@ -1,17 +1,23 @@
 # OS / editor
 .DS_Store
 *.swp
+*~
+Untitled
+
+# Env files -- never commit real secrets
+.env
+.env.*
+!.env.example
+!.env*.example
 
 # Go
 /backend/cmd/server/server
 /backend/cmd/server/main
 *.exe
+*.test
 
-# Env files -- never commit real secrets
-.env
-.env.local
-
-# Frontend (future)
+# Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/dist-ssr/
 frontend/.vite/
