@@ -4,6 +4,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { gsap } from "gsap";
 import type { Theme } from "../ThemeToggle";
 import { SECTIONS } from "../sections";
+import { SIDEBAR_WIDTH } from "../layout";
+
+export { SIDEBAR_WIDTH };
 
 const ROAD_TEXTURE_URL =
   "/c69e6031556efc5df8605c54d2f4c628-removebg-preview.png";
@@ -16,7 +19,6 @@ const STOP_FRACTIONS = SECTIONS.map(
   (_, i) => STOP_MARGIN + (i * (1 - 2 * STOP_MARGIN)) / (SECTIONS.length - 1),
 );
 
-export const SIDEBAR_WIDTH = 200;
 const ROAD_CANVAS_WIDTH = 72;
 
 // The orthographic camera always shows exactly this many world units of

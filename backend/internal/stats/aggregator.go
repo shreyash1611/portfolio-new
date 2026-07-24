@@ -3,6 +3,7 @@ package stats
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"portfolio/backend/internal/platform/codeforces"
@@ -23,11 +24,10 @@ func NewAggregator(gh *github.Client, lc *leetcode.Client, cf *codeforces.Client
 }
 
 // Fetch calls every platform concurrently and merges the results into one
-// Snapshot. If any single call fails, the whole Fetch fails -- there is no
-// partial snapshot. That's a deliberate choice: resilience comes from the
-// cache layer (internal/cache) continuing to serve the last *complete*
-// successful snapshot when a refresh fails, rather than this layer trying
-// to patch together an inconsistent partial one.
+// Snapshot. GitHub + LeetCode failures still fail the whole fetch (they're
+// required for a useful Skills panel). Codeforces is best-effort: Render
+// (and other cloud hosts) often time out talking to codeforces.com, and
+// we'd rather serve GH/LC data with empty CF fields than serve nothing.
 func (a *Aggregator) Fetch(ctx context.Context) (Snapshot, error) {
 	var (
 		ghDays    []github.ContributionDay
@@ -46,7 +46,7 @@ func (a *Aggregator) Fetch(ctx context.Context) (Snapshot, error) {
 
 	now := time.Now()
 
-	err := runConcurrently(
+	requiredErr := runConcurrently(
 		named("github contribution calendar", func() (err error) {
 			ghDays, err = a.github.ContributionCalendar(ctx, now.AddDate(-1, 0, 0), now)
 			return err
@@ -71,6 +71,12 @@ func (a *Aggregator) Fetch(ctx context.Context) (Snapshot, error) {
 			lcCalendarLast, err = a.leetcode.SubmissionCalendar(ctx, now.Year()-1)
 			return err
 		}),
+	)
+	if requiredErr != nil {
+		return Snapshot{}, fmt.Errorf("fetching platform data: %w", requiredErr)
+	}
+
+	cfErr := runConcurrently(
 		named("codeforces user info", func() (err error) {
 			cfInfo, err = a.codeforces.UserInfo(ctx)
 			return err
@@ -84,8 +90,11 @@ func (a *Aggregator) Fetch(ctx context.Context) (Snapshot, error) {
 			return err
 		}),
 	)
-	if err != nil {
-		return Snapshot{}, fmt.Errorf("fetching platform data: %w", err)
+	if cfErr != nil {
+		log.Printf("codeforces unavailable, continuing without it: %v", cfErr)
+		cfInfo = codeforces.UserInfo{Handle: a.codeforces.Handle()}
+		cfRatings = nil
+		cfSubs = nil
 	}
 
 	cfSolved := codeforces.DedupeSolved(cfSubs)

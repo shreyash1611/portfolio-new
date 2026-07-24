@@ -40,7 +40,7 @@ func Load() (Config, error) {
 
 	cfg := Config{
 		Port:          getEnv("PORT", "8080"),
-		AllowedOrigin: getEnv("ALLOWED_ORIGIN", "http://localhost:5173"),
+		AllowedOrigin: strings.TrimRight(getEnv("ALLOWED_ORIGIN", "http://localhost:5173"), "/"),
 		CacheTTL:      ttl,
 
 		GitHubUsername:   os.Getenv("GITHUB_USERNAME"),

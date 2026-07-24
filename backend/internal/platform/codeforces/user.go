@@ -34,7 +34,9 @@ func (c *Client) Submissions(ctx context.Context) ([]Submission, error) {
 	query := url.Values{
 		"handle": {c.handle},
 		"from":   {"1"},
-		"count":  {"100000"},
+		// Full history (100k) routinely times out from Render; recent
+		// submissions are enough for heatmap + solved counts.
+		"count": {"5000"},
 	}
 	return doRequest[[]Submission](ctx, c.httpClient, "user.status", query)
 }

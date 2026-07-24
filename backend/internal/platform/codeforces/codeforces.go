@@ -21,9 +21,15 @@ type Client struct {
 
 func NewClient(handle string) *Client {
 	return &Client{
-		handle:     handle,
-		httpClient: &http.Client{Timeout: 10 * time.Second},
+		handle: handle,
+		// Codeforces is often slow / flaky from cloud hosts; give it more
+		// room than the default, and keep submissions bounded below.
+		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
+}
+
+func (c *Client) Handle() string {
+	return c.handle
 }
 
 // apiResponse mirrors the envelope every Codeforces API call returns:
