@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"portfolio/backend/internal/platform/codeforces"
@@ -76,26 +77,39 @@ func (a *Aggregator) Fetch(ctx context.Context) (Snapshot, error) {
 		return Snapshot{}, fmt.Errorf("fetching platform data: %w", requiredErr)
 	}
 
-	cfErr := runConcurrently(
-		named("codeforces user info", func() (err error) {
-			cfInfo, err = a.codeforces.UserInfo(ctx)
-			return err
-		}),
-		named("codeforces rating history", func() (err error) {
-			cfRatings, err = a.codeforces.RatingHistory(ctx)
-			return err
-		}),
-		named("codeforces submissions", func() (err error) {
-			cfSubs, err = a.codeforces.Submissions(ctx)
-			return err
-		}),
-	)
-	if cfErr != nil {
-		log.Printf("codeforces unavailable, continuing without it: %v", cfErr)
-		cfInfo = codeforces.UserInfo{Handle: a.codeforces.Handle()}
-		cfRatings = nil
-		cfSubs = nil
-	}
+	// Fetch CF pieces independently (and concurrently) so a slow
+	// submissions call doesn't wipe rating/profile when those succeed.
+	var cfWG sync.WaitGroup
+	cfWG.Add(3)
+	go func() {
+		defer cfWG.Done()
+		info, err := a.codeforces.UserInfo(ctx)
+		if err != nil {
+			log.Printf("codeforces user info unavailable: %v", err)
+			cfInfo = codeforces.UserInfo{Handle: a.codeforces.Handle()}
+			return
+		}
+		cfInfo = info
+	}()
+	go func() {
+		defer cfWG.Done()
+		ratings, err := a.codeforces.RatingHistory(ctx)
+		if err != nil {
+			log.Printf("codeforces rating history unavailable: %v", err)
+			return
+		}
+		cfRatings = ratings
+	}()
+	go func() {
+		defer cfWG.Done()
+		subs, err := a.codeforces.Submissions(ctx)
+		if err != nil {
+			log.Printf("codeforces submissions unavailable: %v", err)
+			return
+		}
+		cfSubs = subs
+	}()
+	cfWG.Wait()
 
 	cfSolved := codeforces.DedupeSolved(cfSubs)
 

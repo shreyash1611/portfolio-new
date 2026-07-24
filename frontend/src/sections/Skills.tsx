@@ -161,9 +161,29 @@ function maxOf(points: RatingPoint[]): number {
 
 const CHART_WIDTH = 520;
 const CHART_HEIGHT = 180;
-const CHART_PADDING = { top: 12, right: 12, bottom: 24, left: 38 };
+const CHART_PADDING = { top: 12, right: 12, bottom: 28, left: 38 };
 const X_TICK_MONTHS = 4;
 const RATING_LOOKBACK_MONTHS = 24;
+/** Don't draw a continuous line across huge contest gaps — it looks broken. */
+const MAX_SEGMENT_GAP_MS = 45 * 24 * 60 * 60 * 1000;
+
+function polylineSegments(points: RatingPoint[]): RatingPoint[][] {
+  if (points.length === 0) return [];
+  const sorted = [...points].sort(
+    (a, b) => toEpochMs(a.date) - toEpochMs(b.date),
+  );
+  const segments: RatingPoint[][] = [[sorted[0]]];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const curr = sorted[i];
+    if (toEpochMs(curr.date) - toEpochMs(prev.date) > MAX_SEGMENT_GAP_MS) {
+      segments.push([curr]);
+    } else {
+      segments[segments.length - 1].push(curr);
+    }
+  }
+  return segments;
+}
 
 function CombinedRatingChart({
   leetcode,
@@ -215,6 +235,11 @@ function CombinedRatingChart({
   const xTicks: number[] = [];
   const tickCursor = new Date(minDate);
   tickCursor.setUTCDate(1);
+  // Start at the first month boundary on/after minDate so the first label
+  // isn't a half-month stub jammed against the axis.
+  if (tickCursor.getTime() < minDate) {
+    tickCursor.setUTCMonth(tickCursor.getUTCMonth() + 1);
+  }
   while (tickCursor.getTime() <= maxDate) {
     xTicks.push(tickCursor.getTime());
     tickCursor.setUTCMonth(tickCursor.getUTCMonth() + X_TICK_MONTHS);
@@ -258,15 +283,15 @@ function CombinedRatingChart({
             />
             <text
               x={xFor(ms)}
-              y={CHART_HEIGHT - 8}
+              y={CHART_HEIGHT - 6}
               fill="var(--muted)"
-              fontSize={10}
+              fontSize={9}
               textAnchor="middle"
               fontFamily="Space Grotesk, sans-serif"
             >
               {new Date(ms).toLocaleDateString("en-US", {
                 month: "short",
-                year: "2-digit",
+                year: "numeric",
                 timeZone: "UTC",
               })}
             </text>
@@ -274,20 +299,25 @@ function CombinedRatingChart({
         ))}
         {series.map((s) => (
           <g key={s.label}>
-            <polyline
-              points={s.points
-                .map((p) => `${xFor(toEpochMs(p.date))},${yFor(p.rating)}`)
-                .join(" ")}
-              fill="none"
-              stroke={s.color}
-              strokeWidth={2}
-            />
+            {polylineSegments(s.points).map((segment, segIdx) => (
+              <polyline
+                key={`${s.label}-seg-${segIdx}`}
+                points={segment
+                  .map((p) => `${xFor(toEpochMs(p.date))},${yFor(p.rating)}`)
+                  .join(" ")}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            ))}
             {s.points.map((p) => (
               <circle
                 key={`${s.label}-${p.date}-${p.label}`}
                 cx={xFor(toEpochMs(p.date))}
                 cy={yFor(p.rating)}
-                r={3}
+                r={2.5}
                 fill={s.color}
               >
                 <title>{`${s.label} — ${p.date}: ${Math.round(p.rating)} (${p.label})`}</title>
@@ -304,6 +334,7 @@ function CombinedRatingChart({
               style={{ backgroundColor: s.color }}
             />
             {s.label}
+            {s.points.length === 0 ? " (none)" : ""}
           </div>
         ))}
       </div>
