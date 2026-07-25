@@ -159,11 +159,12 @@ export default function Trivia() {
           <article className="trivia-panel" id="trivia-built">
             <h2 className="trivia-heading">How it was built</h2>
             <p className="trivia-body">
-              This site was built together — me, and an AI coding assistant in
-              Cursor — over a stretch of evenings. We started with a Go backend
+              This site was built by me, together with an AI coding assistant in
+              Cursor for the frontend — over a stretch of evenings. I started with a Go backend
               that pulls live stats from GitHub, LeetCode, and Codeforces, then
               shaped a React frontend around a simple idea: drive through the
-              pages instead of clicking a boring menu.
+              pages instead of clicking a boring menu. I was supposed to enjoy building a website, learn new things for Front-End 
+              development and build something that is useful.
             </p>
           </article>
 
@@ -196,7 +197,7 @@ export default function Trivia() {
               through this site.
             </p>
           </article>
-
+            
           <article className="trivia-panel" id="trivia-life">
             <h2 className="trivia-heading">Music &amp; fashion</h2>
             <p className="trivia-body">
@@ -207,9 +208,9 @@ export default function Trivia() {
               code.
             </p>
           </article>
-
           <article className="trivia-panel trivia-credit" id="trivia-credit">
             <p className="trivia-credit-line">
+              
               Made by Shreyash Chaurasia
               <span className="trivia-credit-mark" aria-hidden>
                 ✦

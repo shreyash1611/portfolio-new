@@ -1,23 +1,32 @@
+const RESUME_URL = "/Shreyash_Resume.pdf";
+
 export default function Resume() {
   return (
-    <section
-      style={{
-        textAlign: "center",
-        maxWidth: "36rem",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <h1 style={{ marginTop: 0, color: "var(--accent)" }}>resume</h1>
-      <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>
-        Resume PDF coming soon — drop the file in{" "}
-        <code>frontend/public/</code> and this button will download it.
+    <section className="resume-page">
+      <p className="resume-kicker">CV</p>
+      <h1 className="resume-title">Resume</h1>
+      <p className="resume-lede">
+        One-pager — roles, stack, and the work behind the portfolio.
       </p>
-      <button type="button" disabled style={{ marginTop: "1rem" }}>
-        download resume
-      </button>
+
+      <div className="resume-actions">
+        <a
+          className="resume-download"
+          href={RESUME_URL}
+          download="Shreyash_Chaurasia_Resume.pdf"
+        >
+          Download PDF
+          <span aria-hidden>→</span>
+        </a>
+        <a
+          className="resume-open"
+          href={RESUME_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open in browser
+        </a>
+      </div>
     </section>
   );
 }

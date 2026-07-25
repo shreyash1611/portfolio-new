@@ -33,6 +33,7 @@ const LINKS = [
     detail: "shreyashc1611@gmail.com",
     href: "mailto:shreyashc1611@gmail.com",
     external: false,
+    wide: true,
   },
 ] as const;
 
@@ -106,39 +107,55 @@ const ICONS = {
 export default function Socials() {
   return (
     <section className="socials-page">
-      <p className="socials-kicker">Connect</p>
-      <h1 className="socials-title">Socials</h1>
-      <p className="socials-lede">
-        Profiles, contests, and a direct line — pick a channel.
-      </p>
+      <div className="socials-atmosphere" aria-hidden>
+        <span className="socials-atmosphere__orb" />
+        <span className="socials-atmosphere__ring" />
+        <span className="socials-atmosphere__scan" />
+      </div>
 
-      <ul className="socials-grid">
-        {LINKS.map((link) => {
-          const Icon = ICONS[link.id];
-          return (
-            <li key={link.id}>
-              <a
-                className="socials-card"
-                href={link.href}
-                {...(link.external
-                  ? { target: "_blank", rel: "noreferrer" }
-                  : {})}
+      <div className="socials-foreground">
+        <p className="socials-kicker">Connect</p>
+        <h1 className="socials-title">Socials</h1>
+        <p className="socials-lede">
+          Profiles, contests, and a direct line — pick a channel.
+        </p>
+
+        <ul className="socials-grid">
+          {LINKS.map((link, i) => {
+            const Icon = ICONS[link.id];
+            const wide = "wide" in link && link.wide;
+            return (
+              <li
+                key={link.id}
+                className={`socials-item${wide ? " socials-item--wide" : ""}`}
+                style={{ animationDelay: `${0.05 + i * 0.07}s` }}
               >
-                <span className="socials-card__icon">
-                  <Icon />
-                </span>
-                <span className="socials-card__text">
-                  <span className="socials-card__label">{link.label}</span>
-                  <span className="socials-card__detail">{link.detail}</span>
-                </span>
-                <span className="socials-card__arrow" aria-hidden>
-                  →
-                </span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+                <a
+                  className={`socials-card socials-card--${link.id}`}
+                  href={link.href}
+                  {...(link.external
+                    ? { target: "_blank", rel: "noreferrer" }
+                    : {})}
+                >
+                  <span className="socials-card__index">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="socials-card__icon">
+                    <Icon />
+                  </span>
+                  <span className="socials-card__text">
+                    <span className="socials-card__label">{link.label}</span>
+                    <span className="socials-card__detail">{link.detail}</span>
+                  </span>
+                  <span className="socials-card__arrow" aria-hidden>
+                    →
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </section>
   );
 }

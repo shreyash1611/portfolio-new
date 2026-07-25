@@ -53,7 +53,7 @@ export default function Home() {
         }}
       >
         <p style={{ margin: 0 }}>
-          I work at Standard Chartered with about a year of professional
+          Currenrly working as a Development Engineer at Standard Chartered with about a year of professional
           experience, contributing to systems that move and shape data across
           the organization.
         </p>
