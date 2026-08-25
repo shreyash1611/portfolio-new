@@ -18,7 +18,7 @@ export default function Home() {
         <h1
           className="font-display"
           style={{
-            fontSize: "clamp(2.4rem, 7vw, 4.5rem)",
+            fontSize: "clamp(2.8rem, 8vw, 5.25rem)",
             lineHeight: 1.1,
             margin: "0 0 0.75rem",
             color: "var(--accent)",

@@ -41,19 +41,17 @@ function App() {
     dismissBootSplash();
   }, []);
 
-  useEffect(() => {
-    if (!carReady) return;
-    const id = window.setTimeout(() => setShowLoader(false), 700);
-    return () => window.clearTimeout(id);
-  }, [carReady]);
-
   const ActiveSection = SECTION_VIEWS[activeIndex] ?? Home;
   const isTrivia = SECTIONS[activeIndex]?.id === "trivia";
 
   return (
     <>
       {showLoader && (
-        <CarLoader progress={loadProgress} ready={carReady} />
+        <CarLoader
+          progress={loadProgress}
+          ready={carReady}
+          onExitComplete={() => setShowLoader(false)}
+        />
       )}
       <Suspense fallback={null}>
         <DriveScene

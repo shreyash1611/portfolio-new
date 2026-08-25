@@ -116,7 +116,7 @@ select {
   margin: 0;
   font-family: "Syne", sans-serif;
   font-weight: 800;
-  font-size: clamp(1.85rem, 4.5vw, 2.6rem);
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
   color: var(--accent);
@@ -438,7 +438,7 @@ select {
   margin: 0;
   font-family: "Syne", sans-serif;
   font-weight: 800;
-  font-size: clamp(1.85rem, 4.5vw, 2.6rem);
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
   color: var(--accent);
@@ -878,7 +878,7 @@ select {
   margin: 0;
   font-family: "Syne", sans-serif;
   font-weight: 800;
-  font-size: clamp(1.85rem, 4.5vw, 2.6rem);
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
   color: var(--accent);
@@ -1046,7 +1046,7 @@ select {
   margin: 0;
   font-family: "Syne", sans-serif;
   font-weight: 800;
-  font-size: clamp(1.85rem, 4.5vw, 2.6rem);
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
   color: var(--accent);
@@ -1141,6 +1141,8 @@ select {
 }
 
 .trivia-track {
+  position: relative;
+  z-index: 1;
   display: flex;
   height: 100%;
   width: max-content;
@@ -1158,27 +1160,102 @@ select {
 }
 
 .trivia-credit {
-  align-items: center;
-  text-align: center;
-}
-
-.trivia-credit-line {
-  margin: 0;
-  font-family: "Instrument Serif", Georgia, serif;
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-weight: 400;
-  color: var(--trivia-ink);
-  letter-spacing: -0.02em;
-  display: flex;
+  position: relative;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  text-align: center;
+  gap: 0.7rem;
+}
+
+.trivia-credit-glow {
+  position: absolute;
+  width: min(55vw, 420px);
+  height: min(55vw, 420px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--trivia-volt) 22%, transparent) 0%,
+    transparent 68%
+  );
+  pointer-events: none;
+  filter: blur(10px);
+  z-index: 0;
+}
+
+.trivia-credit-made {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.trivia-credit-made-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.trivia-credit-name {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--trivia-ink);
+}
+
+.trivia-credit-name-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  line-height: 1.15;
+}
+
+.trivia-credit-name-char {
+  display: inline-block;
+  will-change: transform, opacity;
 }
 
 .trivia-credit-mark {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.22em;
   color: var(--trivia-volt);
-  font-size: 0.7em;
+  font-size: 0.42em;
   line-height: 1;
+  transform-origin: 50% 55%;
+  will-change: transform, opacity;
+}
+
+.trivia-credit-rule {
+  position: relative;
+  z-index: 1;
+  width: min(14rem, 46vw);
+  height: 2px;
+  margin-top: 0.35rem;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--trivia-volt) 18%,
+    var(--trivia-volt) 82%,
+    transparent 100%
+  );
+  transform-origin: center;
+  will-change: transform;
 }
 
 .trivia-kicker {
@@ -1199,7 +1276,7 @@ select {
   margin: 0 0 1.5rem;
   font-family: "Instrument Serif", Georgia, serif;
   font-weight: 400;
-  font-size: clamp(3.4rem, 12vw, 7rem);
+  font-size: clamp(4rem, 13vw, 8rem);
   line-height: 0.92;
   letter-spacing: -0.03em;
   color: var(--trivia-ink);
@@ -1262,7 +1339,7 @@ select {
 .trivia-heading {
   margin: 0 0 1rem;
   font-family: "Instrument Serif", Georgia, serif;
-  font-size: clamp(2.2rem, 5.5vw, 3.4rem);
+  font-size: clamp(2.6rem, 6.5vw, 4rem);
   line-height: 1.05;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -1285,50 +1362,145 @@ select {
   }
 }
 
-/* Full-page car load — side-view E30 while the GLTF (~14MB) downloads. */
+/* Full-page load — credit intro + side-view E30 while the GLTF downloads. */
 .car-loader {
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  background: var(--bg);
-  opacity: 1;
-  transition: opacity 0.65s ease;
-  pointer-events: all;
-}
-
-.car-loader--out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.car-loader__stage {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(1rem, 2.5vw, 1.75rem);
-  width: min(1100px, 96vw);
+  justify-content: center;
+  gap: clamp(1.75rem, 4vh, 3rem);
+  padding: 1.5rem;
+  background: var(--bg);
+  opacity: 1;
+  pointer-events: all;
+  overflow: hidden;
+}
+
+.car-loader__glow {
+  position: absolute;
+  width: min(70vw, 520px);
+  height: min(70vw, 520px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 28%, transparent) 0%,
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(8px);
+}
+
+.car-loader__credit {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: center;
+  max-width: min(92vw, 720px);
+}
+
+.car-loader__made {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.72rem, 1.8vw, 0.85rem);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted, #888) 90%, var(--fg));
+}
+
+.car-loader__made-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.car-loader__name {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(2.4rem, 8vw, 4.6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.car-loader__name-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  line-height: 1.15;
+}
+
+.car-loader__name-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.car-loader__mark {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.2em;
+  color: var(--accent);
+  font-size: 0.42em;
+  transform-origin: 50% 55%;
+  will-change: transform, opacity;
+}
+
+.car-loader__rule {
+  width: min(12rem, 42vw);
+  height: 2px;
+  margin-top: 0.35rem;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 20%,
+    var(--accent) 80%,
+    transparent 100%
+  );
+  transform-origin: center;
+  will-change: transform;
+}
+
+.car-loader__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+  width: min(900px, 92vw);
 }
 
 .car-loader__car {
   width: 100%;
-  max-height: min(48vh, 420px);
+  max-height: min(32vh, 280px);
   height: auto;
   object-fit: contain;
   display: block;
   animation: car-loader-roll 2.4s ease-in-out infinite;
-  /* Soft glow follows the silhouette now that the PNG is transparent. */
   filter: drop-shadow(0 18px 36px rgba(255, 161, 22, 0.28));
   user-select: none;
   -webkit-user-drag: none;
 }
 
 .car-loader__track {
-  width: min(420px, 72%);
+  width: min(360px, 70%);
   height: 3px;
-  background: #1a1a1a;
+  background: color-mix(in srgb, var(--muted, #888) 25%, transparent);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -1342,11 +1514,11 @@ select {
 
 .car-loader__label {
   margin: 0;
-  font-family: monospace;
-  font-size: clamp(0.7rem, 2.2vw, 0.8rem);
-  letter-spacing: 0.12em;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #888;
+  color: color-mix(in srgb, var(--muted, #888) 90%, var(--fg));
 }
 
 @keyframes car-loader-roll {
@@ -1360,13 +1532,16 @@ select {
 }
 
 @media (max-width: 640px) {
-  .car-loader__stage {
-    width: min(100%, 94vw);
-    gap: 1.1rem;
+  .car-loader {
+    gap: 1.4rem;
+  }
+
+  .car-loader__name {
+    font-size: clamp(2rem, 11vw, 2.8rem);
   }
 
   .car-loader__car {
-    max-height: min(34vh, 220px);
+    max-height: min(26vh, 180px);
     filter: drop-shadow(0 10px 22px rgba(255, 161, 22, 0.22));
   }
 
