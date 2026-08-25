@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { SIDEBAR_WIDTH } from "./layout";
 import ThemeToggle, { type Theme } from "./ThemeToggle";
 import CarLoader from "./CarLoader";
+import MobileNav from "./MobileNav";
+import useCompactLayout from "./useCompactLayout";
 import { SECTIONS } from "./sections";
 import Home from "./sections/Home";
 import Skills from "./sections/Skills";
@@ -22,11 +24,17 @@ function dismissBootSplash() {
 }
 
 function App() {
+  const compact = useCompactLayout();
   const [theme, setTheme] = useState<Theme>("dark");
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
   const [carReady, setCarReady] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
+
+  document.documentElement.setAttribute(
+    "data-layout",
+    compact ? "compact" : "desktop",
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -41,6 +49,7 @@ function App() {
     dismissBootSplash();
   }, []);
 
+  const sceneReady = compact || carReady;
   const ActiveSection = SECTION_VIEWS[activeIndex] ?? Home;
   const isTrivia = SECTIONS[activeIndex]?.id === "trivia";
 
@@ -48,35 +57,38 @@ function App() {
     <>
       {showLoader && (
         <CarLoader
-          progress={loadProgress}
-          ready={carReady}
+          progress={compact ? 100 : loadProgress}
+          ready={sceneReady}
           onExitComplete={() => setShowLoader(false)}
         />
       )}
-      <Suspense fallback={null}>
-        <DriveScene
-          theme={theme}
+      {!compact && (
+        <Suspense fallback={null}>
+          <DriveScene
+            theme={theme}
+            activeIndex={activeIndex}
+            onActiveIndexChange={setActiveIndex}
+            onLoadProgress={setLoadProgress}
+            onLoadComplete={() => setCarReady(true)}
+          />
+        </Suspense>
+      )}
+      {compact && (
+        <MobileNav
           activeIndex={activeIndex}
           onActiveIndexChange={setActiveIndex}
-          onLoadProgress={setLoadProgress}
-          onLoadComplete={() => setCarReady(true)}
         />
-      </Suspense>
+      )}
       <ThemeToggle
         theme={theme}
         onToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
 
       <main
+        className={`site-main${isTrivia ? " site-main--trivia" : ""}`}
         style={{
-          marginLeft: theme === "dark" ? SIDEBAR_WIDTH : 0,
-          marginRight: theme === "light" ? SIDEBAR_WIDTH : 0,
-          padding: isTrivia ? "0 1.25rem 0" : "5rem 2rem 2rem",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: isTrivia ? "stretch" : "center",
-          transition: "margin 0.8s ease",
+          marginLeft: compact ? 0 : theme === "dark" ? SIDEBAR_WIDTH : 0,
+          marginRight: compact ? 0 : theme === "light" ? SIDEBAR_WIDTH : 0,
         }}
       >
         <ActiveSection key={SECTIONS[activeIndex].id} />

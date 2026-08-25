@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import useCompactLayout from "../useCompactLayout";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,6 +62,7 @@ function BoltMark() {
 }
 
 export default function Trivia() {
+  const compact = useCompactLayout();
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -121,11 +123,17 @@ export default function Trivia() {
     const credit = creditRef.current;
     if (!pin || !track) return;
 
+    const stacked = compact;
+
     const panels = Array.from(
       track.querySelectorAll<HTMLElement>(".trivia-panel"),
     );
 
     const sizePanels = () => {
+      if (stacked) {
+        for (const panel of panels) panel.style.width = "";
+        return;
+      }
       const width = pin.clientWidth;
       for (const panel of panels) {
         panel.style.width = `${width}px`;
@@ -136,19 +144,24 @@ export default function Trivia() {
 
     const getTravel = () => Math.max(0, track.scrollWidth - pin.clientWidth);
 
-    const tween = gsap.to(track, {
-      x: () => -getTravel(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: pin,
-        start: "top top",
-        end: () => `+=${getTravel()}`,
-        pin: true,
-        scrub: 0.65,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      },
-    });
+    let tween: gsap.core.Tween | null = null;
+    if (!stacked) {
+      tween = gsap.to(track, {
+        x: () => -getTravel(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: pin,
+          start: "top top",
+          end: () => `+=${getTravel()}`,
+          pin: true,
+          scrub: 0.65,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    } else {
+      gsap.set(track, { x: 0 });
+    }
 
     let creditTl: gsap.core.Timeline | null = null;
     let creditSpin: gsap.core.Tween | null = null;
@@ -222,8 +235,8 @@ export default function Trivia() {
 
       creditTrigger = ScrollTrigger.create({
         trigger: credit,
-        containerAnimation: tween,
-        start: "left 75%",
+        containerAnimation: tween ?? undefined,
+        start: stacked ? "top 82%" : "left 75%",
         once: true,
         onEnter: playCredit,
       });
@@ -241,13 +254,13 @@ export default function Trivia() {
       creditTrigger?.kill();
       creditSpin?.kill();
       creditTl?.kill();
-      tween.scrollTrigger?.kill();
-      tween.kill();
+      tween?.scrollTrigger?.kill();
+      tween?.kill();
     };
-  }, []);
+  }, [compact]);
 
   return (
-    <section className="trivia-page trivia-hscroll">
+    <section className={`trivia-page trivia-hscroll${compact ? " trivia-page--stack" : ""}`}>
       <div ref={pinRef} className="trivia-pin">
         <div ref={trackRef} className="trivia-track">
           <article className="trivia-panel" id="trivia-intro">
@@ -265,8 +278,13 @@ export default function Trivia() {
             </h1>
             <p className="trivia-lead">
               <span className="trivia-brace">{"{"}</span>
-              Scroll sideways through a few notes on how this portfolio came
-              together.
+              <span className="trivia-lead__desk">
+                Scroll sideways through a few notes on how this portfolio came
+                together.
+              </span>
+              <span className="trivia-lead__phone">
+                Scroll through a few notes on how this portfolio came together.
+              </span>
               <span className="trivia-brace">{"}"}</span>
             </p>
           </article>
@@ -306,7 +324,7 @@ export default function Trivia() {
           <article className="trivia-panel" id="trivia-car">
             <h2 className="trivia-heading">The car</h2>
             <p className="trivia-body">
-              The car on the navbar is a BMW E30 — an absolute classic. Compact,
+              The car on the nav is a BMW E30 — an absolute classic. Compact,
               boxy, honest proportions. Still one of the most beautiful shapes
               BMW ever put on the road, and the right companion for moving
               through this site.

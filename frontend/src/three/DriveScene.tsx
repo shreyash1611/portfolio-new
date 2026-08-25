@@ -300,6 +300,7 @@ export default function DriveScene({
 
   return (
     <div
+      className="drive-scene"
       style={{
         position: "fixed",
         top: 0,

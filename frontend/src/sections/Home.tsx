@@ -1,19 +1,6 @@
 export default function Home() {
   return (
-    <section
-      style={{
-        width: "100%",
-        maxWidth: "42rem",
-        minHeight: "calc(100vh - 7rem)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        gap: "2.5rem",
-        paddingBottom: "2rem",
-      }}
-    >
+    <section className="home-page">
       <header>
         <h1
           className="font-display"
